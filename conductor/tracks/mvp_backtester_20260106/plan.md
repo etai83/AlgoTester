@@ -3,7 +3,7 @@
 ## Phase 1: Foundation & Backend Core
 *Goal: Project scaffolding and core backtesting logic.*
 
-- [ ] Task: Initialize backend Express server with TypeScript and basic project structure.
+- [~] Task: Initialize backend Express server with TypeScript and basic project structure.
 - [ ] Task: Implement CSV data parser for BTCUSD OHLCV data.
 - [ ] Task: Write Tests: Indicator calculation logic (SMA, EMA, RSI).
 - [ ] Task: Implement Indicator calculations.
