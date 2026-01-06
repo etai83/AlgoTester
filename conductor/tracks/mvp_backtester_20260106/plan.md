@@ -1,6 +1,6 @@
 # Plan: MVP Backtester Core
 
-## Phase 1: Foundation & Backend Core
+## Phase 1: Foundation & Backend Core [checkpoint: 1460acb]
 *Goal: Project scaffolding and core backtesting logic.*
 
 - [x] Task: Initialize backend Express server with TypeScript and basic project structure. c1f1c50
@@ -11,7 +11,7 @@
 - [x] Task: Implement Rule evaluation engine. fdef812
 - [x] Task: Write Tests: Trade simulation logic (entry/exit, fees, balance). 4b2ce16
 - [x] Task: Implement Trade simulation logic. 4b2ce16
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Backend Core' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Backend Core' (Protocol in workflow.md) 1460acb
 
 ## Phase 2: Frontend Development & Integration
 *Goal: Build the UI and connect it to the backtesting engine.*
