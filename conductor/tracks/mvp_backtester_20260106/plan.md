@@ -9,8 +9,8 @@
 - [x] Task: Implement Indicator calculations. 423f017
 - [x] Task: Write Tests: Rule evaluation engine (comparisons and AND/OR logic). fdef812
 - [x] Task: Implement Rule evaluation engine. fdef812
-- [x] Task: Write Tests: Trade simulation logic (entry/exit, fees, balance).
-- [~] Task: Implement Trade simulation logic.
+- [x] Task: Write Tests: Trade simulation logic (entry/exit, fees, balance). 4b2ce16
+- [x] Task: Implement Trade simulation logic. 4b2ce16
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Backend Core' (Protocol in workflow.md)
 
 ## Phase 2: Frontend Development & Integration
