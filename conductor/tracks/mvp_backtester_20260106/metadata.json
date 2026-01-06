@@ -1,0 +1,8 @@
+{
+  "track_id": "mvp_backtester_20260106",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-06T12:00:00Z",
+  "updated_at": "2026-01-06T12:00:00Z",
+  "description": "Build the core backtesting engine for BTCUSD with multi-indicator logic (AND/OR operators), and a basic web UI for rule definition (SMA, EMA, RSI) and performance reporting."
+}
