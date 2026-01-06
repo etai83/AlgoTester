@@ -7,8 +7,8 @@
 - [x] Task: Implement CSV data parser for BTCUSD OHLCV data. 9ca22c6
 - [x] Task: Write Tests: Indicator calculation logic (SMA, EMA, RSI). 423f017
 - [x] Task: Implement Indicator calculations. 423f017
-- [ ] Task: Write Tests: Rule evaluation engine (comparisons and AND/OR logic).
-- [ ] Task: Implement Rule evaluation engine.
+- [x] Task: Write Tests: Rule evaluation engine (comparisons and AND/OR logic).
+- [~] Task: Implement Rule evaluation engine.
 - [ ] Task: Write Tests: Trade simulation logic (entry/exit, fees, balance).
 - [ ] Task: Implement Trade simulation logic.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Backend Core' (Protocol in workflow.md)
