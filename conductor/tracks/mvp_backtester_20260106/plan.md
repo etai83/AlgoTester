@@ -5,8 +5,8 @@
 
 - [x] Task: Initialize backend Express server with TypeScript and basic project structure. c1f1c50
 - [x] Task: Implement CSV data parser for BTCUSD OHLCV data. 9ca22c6
-- [~] Task: Write Tests: Indicator calculation logic (SMA, EMA, RSI).
-- [ ] Task: Implement Indicator calculations.
+- [x] Task: Write Tests: Indicator calculation logic (SMA, EMA, RSI). 423f017
+- [x] Task: Implement Indicator calculations. 423f017
 - [ ] Task: Write Tests: Rule evaluation engine (comparisons and AND/OR logic).
 - [ ] Task: Implement Rule evaluation engine.
 - [ ] Task: Write Tests: Trade simulation logic (entry/exit, fees, balance).
