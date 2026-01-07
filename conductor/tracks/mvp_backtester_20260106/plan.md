@@ -20,7 +20,7 @@
 - [x] Task: Implement Rule Definition GUI components. e93e69d
 - [x] Task: Implement Dashboard summary metrics display. 7e486f2
 - [x] Task: Implement Equity Curve chart using a charting library (e.g., Chart.js or Recharts). 5f7d9bb
-- [~] Task: Implement Interactive Price Chart with trade markers.
+- [x] Task: Implement Interactive Price Chart with trade markers. 41324cf
 - [ ] Task: Implement Distribution of Returns histogram.
 - [ ] Task: Connect Frontend to Backend API for running backtests.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Frontend Development & Integration' (Protocol in workflow.md)
