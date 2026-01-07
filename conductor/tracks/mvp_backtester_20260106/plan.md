@@ -19,7 +19,7 @@
 - [x] Task: Initialize React frontend with Tailwind CSS and basic routing. 4e97562
 - [x] Task: Implement Rule Definition GUI components. e93e69d
 - [x] Task: Implement Dashboard summary metrics display. 7e486f2
-- [ ] Task: Implement Equity Curve chart using a charting library (e.g., Chart.js or Recharts).
+- [~] Task: Implement Equity Curve chart using a charting library (e.g., Chart.js or Recharts).
 - [ ] Task: Implement Interactive Price Chart with trade markers.
 - [ ] Task: Implement Distribution of Returns histogram.
 - [ ] Task: Connect Frontend to Backend API for running backtests.
