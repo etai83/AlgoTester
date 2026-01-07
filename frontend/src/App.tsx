@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import RuleBuilder from './components/RuleBuilder';
 import MetricsSummary from './components/MetricsSummary';
@@ -6,23 +6,28 @@ import EquityCurve from './components/EquityCurve';
 import PriceChart from './components/PriceChart';
 import ReturnsHistogram from './components/ReturnsHistogram';
 import { runBacktest } from './services/api';
-import { Play, Loader2 } from 'lucide-react';
+import { Play, Loader2, Upload } from 'lucide-react';
 
 function Dashboard() {
   const [entryRule, setEntryRule] = useState<any>(null);
   const [exitRule, setExitRule] = useState<any>(null);
-  const [csvPath, setCsvPath] = useState('data.csv');
+  const [file, setFile] = useState<File | null>(null);
   const [initialBalance, setInitialBalance] = useState(10000);
   const [results, setResults] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleRunBacktest = async () => {
+    if (!file) {
+      setError("Please upload a CSV file");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
       const payload = {
-        csvFilePath: csvPath,
+        file,
         rules: {
           entry: entryRule,
           exit: exitRule
@@ -38,6 +43,12 @@ function Dashboard() {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
+  };
+
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       <header className="flex justify-between items-center">
@@ -45,14 +56,30 @@ function Dashboard() {
           <h1 className="text-3xl font-bold text-white">Backtester POC</h1>
           <p className="text-gray-400">Define rules and test your BTCUSD strategy.</p>
         </div>
-        <button
-          onClick={handleRunBacktest}
-          disabled={loading || !entryRule || !exitRule}
-          className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg"
-        >
-          {loading ? <Loader2 className="animate-spin" size={20} /> : <Play size={20} />}
-          <span>{loading ? 'Running...' : 'Run Backtest'}</span>
-        </button>
+        <div className="flex space-x-4">
+           <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center space-x-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-3 rounded-lg font-semibold transition-colors border border-gray-600"
+          >
+            <Upload size={20} />
+            <span>{file ? file.name : 'Upload CSV'}</span>
+          </button>
+          <input 
+            type="file" 
+            accept=".csv" 
+            ref={fileInputRef} 
+            onChange={handleFileChange} 
+            className="hidden" 
+          />
+          <button
+            onClick={handleRunBacktest}
+            disabled={loading || !entryRule || !exitRule || !file}
+            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg"
+          >
+            {loading ? <Loader2 className="animate-spin" size={20} /> : <Play size={20} />}
+            <span>{loading ? 'Running...' : 'Run Backtest'}</span>
+          </button>
+        </div>
       </header>
 
       {error && (
@@ -67,16 +94,7 @@ function Dashboard() {
         <RuleBuilder title="Exit Rules" onChange={setExitRule} />
       </div>
 
-      <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-xl flex flex-wrap gap-6 items-end">
-        <div className="flex-1 min-w-[200px]">
-          <label className="block text-xs text-gray-500 mb-1 uppercase tracking-wider">CSV Data Path</label>
-          <input
-            type="text"
-            value={csvPath}
-            onChange={(e) => setCsvPath(e.target.value)}
-            className="w-full bg-gray-900 text-white rounded px-3 py-2 border border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
-        </div>
+      <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-xl flex items-center">
         <div className="w-48">
           <label className="block text-xs text-gray-500 mb-1 uppercase tracking-wider">Initial Balance ($)</label>
           <input
