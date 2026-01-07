@@ -27,6 +27,29 @@ describe('CSV Parser', () => {
     });
   });
 
+  it('should correctly parse a yfinance format CSV file', async () => {
+    const mockCsvContent = `Datetime,Close,High,Low,Open,Volume
+2024-01-09 14:30:00+00:00,403.31,403.77,401.71,401.91,13737477
+2024-01-09 15:30:00+00:00,404.57,404.74,402.93,403.31,4982033`;
+
+    (fs.readFile as jest.Mock).mockResolvedValue(mockCsvContent);
+
+    const data = await parseCsv('yfinance.csv');
+
+    expect(data).toHaveLength(2);
+    
+    if (data.length > 0) {
+        // Check first row
+        const row = data[0]!;
+        expect(row.timestamp).toBe(new Date('2024-01-09 14:30:00+00:00').getTime());
+        expect(row.close).toBe(403.31);
+        expect(row.open).toBe(401.91); // Open is column 4
+        expect(row.high).toBe(403.77);
+        expect(row.low).toBe(401.71);
+        expect(row.volume).toBe(13737477);
+    }
+  });
+
   it('should throw an error for a non-existent file', async () => {
     (fs.readFile as jest.Mock).mockRejectedValue(new Error('File not found'));
 
