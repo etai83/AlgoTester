@@ -25,10 +25,10 @@
 - [x] Task: Connect Frontend to Backend API for running backtests. 1317823
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Frontend Development & Integration' (Protocol in workflow.md) 548f2b1
 
-## Phase 3: Refinement & Validation
+## Phase 3: Refinement & Validation [checkpoint: 0916996]
 *Goal: Final testing and data persistence.*
 
 - [x] Task: Implement local JSON storage for strategy definitions. 1161f46
 - [x] Task: Add error handling and technical logging for backtest failures. b41a7f2
 - [x] Task: Perform end-to-end testing with a sample BTCUSD dataset. ba522f8
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Refinement & Validation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Refinement & Validation' (Protocol in workflow.md) 0916996
