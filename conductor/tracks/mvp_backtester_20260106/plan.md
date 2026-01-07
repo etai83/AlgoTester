@@ -16,7 +16,7 @@
 ## Phase 2: Frontend Development & Integration
 *Goal: Build the UI and connect it to the backtesting engine.*
 
-- [ ] Task: Initialize React frontend with Tailwind CSS and basic routing.
+- [~] Task: Initialize React frontend with Tailwind CSS and basic routing.
 - [ ] Task: Implement Rule Definition GUI components.
 - [ ] Task: Implement Dashboard summary metrics display.
 - [ ] Task: Implement Equity Curve chart using a charting library (e.g., Chart.js or Recharts).
