@@ -33,4 +33,13 @@ describe('Server Initialization', () => {
     expect(response.body.stats).toBeDefined();
     expect(response.body.equityCurve).toBeDefined();
   });
+
+  it('should return 400 for invalid backtest request', async () => {
+    const response = await request(app)
+      .post('/api/backtest/run')
+      .send({}); // Missing file/path
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBeDefined();
+  });
 });

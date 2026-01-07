@@ -18,9 +18,16 @@ This Proof of Concept (POC) aims to provide developers building automated tradin
     - Net Profit/Loss
     - Win Rate
     - Maximum Drawdown
+    - Equity Curve Visualization
+    - Interactive Price Chart with Trade Markers
+    - Returns Histogram
 - **Flexible Data Sourcing:** 
     - **Primary:** Direct integration with TradingView for high-fidelity historical data.
     - **Fallback:** Support for local CSV file uploads containing historical OHLCV data.
+
+# Completed Milestones
+
+- **MVP Backtester Core:** A functional POC including a backend engine for data ingestion, indicator calculation, and trade simulation, paired with a React frontend for rule definition and result visualization.
 
 # User Experience
 
