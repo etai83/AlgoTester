@@ -83,14 +83,6 @@ function Dashboard() {
             onChange={handleFileChange} 
             className="hidden" 
           />
-          <button
-            onClick={handleRunBacktest}
-            disabled={loading || !entryRule || !exitRule || !file}
-            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg"
-          >
-            {loading ? <Loader2 className="animate-spin" size={20} /> : <Play size={20} />}
-            <span>{loading ? 'Running...' : 'Run Backtest'}</span>
-          </button>
         </div>
       </header>
 
@@ -115,6 +107,14 @@ function Dashboard() {
             onChange={(e) => setInitialBalance(Number(e.target.value))}
             className="w-full bg-gray-900 text-white rounded px-3 py-2 border border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
+          <button
+            onClick={handleRunBacktest}
+            disabled={loading || !entryRule || !exitRule || !file}
+            className="mt-4 w-full flex justify-center items-center space-x-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg"
+          >
+            {loading ? <Loader2 className="animate-spin" size={20} /> : <Play size={20} />}
+            <span>{loading ? 'Running...' : 'Run Backtest'}</span>
+          </button>
         </div>
       </div>
 
