@@ -34,7 +34,7 @@ export default function PriceChart({ data, trades }: PriceChartProps) {
     }).format(val);
 
   return (
-    <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-xl h-[500px]">
+    <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-xl h-fit">
       <h3 className="text-xl font-semibold mb-6 text-blue-400">BTCUSD Price Chart</h3>
       <div className="h-[400px] w-full">
         <ResponsiveContainer width="100%" height="100%">
