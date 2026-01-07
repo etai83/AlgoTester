@@ -13,7 +13,7 @@
 - [x] Task: Implement Trade simulation logic. 4b2ce16
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Backend Core' (Protocol in workflow.md) 1460acb
 
-## Phase 2: Frontend Development & Integration
+## Phase 2: Frontend Development & Integration [checkpoint: 548f2b1]
 *Goal: Build the UI and connect it to the backtesting engine.*
 
 - [x] Task: Initialize React frontend with Tailwind CSS and basic routing. 4e97562
@@ -22,8 +22,8 @@
 - [x] Task: Implement Equity Curve chart using a charting library (e.g., Chart.js or Recharts). 5f7d9bb
 - [x] Task: Implement Interactive Price Chart with trade markers. 41324cf
 - [x] Task: Implement Distribution of Returns histogram. edcfc1b
-- [x] Task: Connect Frontend to Backend API for running backtests. 97a595c
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Frontend Development & Integration' (Protocol in workflow.md)
+- [x] Task: Connect Frontend to Backend API for running backtests. 1317823
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Frontend Development & Integration' (Protocol in workflow.md) 548f2b1
 
 ## Phase 3: Refinement & Validation
 *Goal: Final testing and data persistence.*
