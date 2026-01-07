@@ -1,6 +1,4 @@
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -62,7 +60,7 @@ export default function EquityCurve({ data }: EquityCurveProps) {
             <Tooltip 
               contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
               itemStyle={{ color: '#3b82f6' }}
-              formatter={(value: number) => [formatCurrency(value), 'Balance']}
+              formatter={(value: number | undefined) => [formatCurrency(value || 0), 'Balance']}
               labelFormatter={(label) => new Date(label).toLocaleString()}
             />
             <Area 

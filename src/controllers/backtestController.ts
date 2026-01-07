@@ -42,3 +42,33 @@ export const executeBacktest = async (req: Request, res: Response) => {
     res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 };
+
+export const previewData = async (req: Request, res: Response) => {
+  try {
+    let csvFilePath: string | undefined;
+
+    if (req.file) {
+      csvFilePath = req.file.path;
+    }
+
+    if (!csvFilePath) {
+      return res.status(400).json({ error: 'File upload is required' });
+    }
+
+    const candles = await parseCsv(csvFilePath);
+    if (candles.length === 0) {
+      return res.status(400).json({ error: 'No data found in CSV file' });
+    }
+
+    // Return only necessary data for plotting
+    const preview = candles.map(c => ({
+      timestamp: c.timestamp,
+      close: c.close
+    }));
+
+    res.json(preview);
+  } catch (error: any) {
+    console.error('Preview error:', error);
+    res.status(500).json({ error: error.message || 'Internal Server Error' });
+  }
+};

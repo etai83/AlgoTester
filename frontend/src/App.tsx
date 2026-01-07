@@ -5,13 +5,14 @@ import MetricsSummary from './components/MetricsSummary';
 import EquityCurve from './components/EquityCurve';
 import PriceChart from './components/PriceChart';
 import ReturnsHistogram from './components/ReturnsHistogram';
-import { runBacktest } from './services/api';
+import { runBacktest, previewCsv } from './services/api';
 import { Play, Loader2, Upload } from 'lucide-react';
 
 function Dashboard() {
   const [entryRule, setEntryRule] = useState<any>(null);
   const [exitRule, setExitRule] = useState<any>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [previewData, setPreviewData] = useState<any[] | null>(null);
   const [initialBalance, setInitialBalance] = useState(10000);
   const [results, setResults] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -43,9 +44,20 @@ function Dashboard() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
+      setResults(null);
+      setPreviewData(null);
+      setError(null);
+      
+      try {
+        const data = await previewCsv(selectedFile);
+        setPreviewData(data);
+      } catch (err: any) {
+        setError(err.response?.data?.error || err.message || 'Failed to preview CSV');
+      }
     }
   };
 
@@ -118,6 +130,16 @@ function Dashboard() {
           <PriceChart 
             data={results.equityCurve.map((p: any) => ({ timestamp: p.timestamp, close: p.price }))} 
             trades={results.trades} 
+          />
+        </div>
+      )}
+
+      {previewData && !results && (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+           <h2 className="text-2xl font-bold text-white mb-4">Data Preview</h2>
+           <PriceChart 
+            data={previewData} 
+            trades={[]} 
           />
         </div>
       )}

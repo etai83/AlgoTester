@@ -4,8 +4,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Area,
-  AreaChart,
   ReferenceDot,
   ComposedChart,
   Line
@@ -64,7 +62,7 @@ export default function PriceChart({ data, trades }: PriceChartProps) {
             <Tooltip 
               contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
               labelFormatter={(label) => new Date(label).toLocaleString()}
-              formatter={(value: number) => [formatCurrency(value), 'Price']}
+              formatter={(value: number | undefined) => [formatCurrency(value || 0), 'Price']}
             />
             <Line 
               type="monotone" 

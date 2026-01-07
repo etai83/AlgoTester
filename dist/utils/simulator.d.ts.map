@@ -1,0 +1,1 @@
+{"version":3,"file":"simulator.d.ts","sourceRoot":"","sources":["../../src/utils/simulator.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,KAAK,EAAE,MAAM,gBAAgB,CAAC;AACvC,OAAO,EAAE,aAAa,EAAE,MAAM,gBAAgB,CAAC;AAC/C,OAAO,EAAE,cAAc,EAAS,MAAM,mBAAmB,CAAC;AAI1D,wBAAgB,WAAW,CACzB,IAAI,EAAE,KAAK,EAAE,EACb,KAAK,EAAE,aAAa,EACpB,cAAc,EAAE,MAAM,EACtB,UAAU,GAAE,MAAU,GACrB,cAAc,CA6HhB"}

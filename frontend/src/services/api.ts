@@ -21,3 +21,15 @@ export const runBacktest = async (payload: any) => {
   });
   return response.data;
 };
+
+export const previewCsv = async (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await axios.post(`${API_BASE_URL}/api/backtest/preview`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};

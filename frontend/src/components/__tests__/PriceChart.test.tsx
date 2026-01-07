@@ -17,8 +17,8 @@ describe('PriceChart', () => {
     { timestamp: '2023-01-03', close: 16700 },
   ];
   const mockTrades = [
-    { type: 'BUY', timestamp: '2023-01-01', price: 16500 },
-    { type: 'SELL', timestamp: '2023-01-03', price: 16700 },
+    { type: 'BUY' as const, timestamp: '2023-01-02', price: 105 },
+    { type: 'SELL' as const, timestamp: '2023-01-04', price: 108 },
   ];
 
   it('should render the price chart container', () => {
