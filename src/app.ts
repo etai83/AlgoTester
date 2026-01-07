@@ -3,6 +3,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import backtestRoutes from './routes/backtestRoutes';
 import strategyRoutes from './routes/strategyRoutes';
+import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
 
@@ -15,5 +16,7 @@ app.use('/api/strategies', strategyRoutes);
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
+
+app.use(errorHandler);
 
 export default app;

@@ -29,6 +29,6 @@
 *Goal: Final testing and data persistence.*
 
 - [x] Task: Implement local JSON storage for strategy definitions. 1161f46
-- [ ] Task: Add error handling and technical logging for backtest failures.
+- [~] Task: Add error handling and technical logging for backtest failures.
 - [ ] Task: Perform end-to-end testing with a sample BTCUSD dataset.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Refinement & Validation' (Protocol in workflow.md)
