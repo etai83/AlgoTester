@@ -9,6 +9,6 @@ describe('App Routing', () => {
         <App />
       </MemoryRouter>
     );
-    expect(screen.getByText(/Backtester POC/i)).toBeInTheDocument();
+    expect(screen.getByText(/AlgoTester/i)).toBeInTheDocument();
   });
 });
