@@ -1,29 +1,37 @@
 import { OHLCV } from './ohlcv';
-import { Rule } from './rules';
+import { StrategyRules } from './rules';
 
 export interface BacktestConfig {
   initialBalance: number;
   commission: number;
-  entryRule: Rule;
-  exitRule: Rule;
+  entryRule: StrategyRules['entry'];
+  exitRule: StrategyRules['exit'];
 }
 
 export interface Trade {
-  entryTimestamp: number;
-  entryPrice: number;
-  exitTimestamp?: number;
-  exitPrice?: number;
+  type: 'BUY' | 'SELL';
+  timestamp: number;
+  price: number;
   quantity: number;
   profit?: number;
   profitPercentage?: number;
-  status: 'open' | 'closed';
+  status: 'OPEN' | 'CLOSED';
 }
 
 export interface BacktestResult {
+  stats: {
+    finalBalance: number;
+    totalProfit: number;
+    winRate: number;
+    maxDrawdown: number;
+    totalTrades: number;
+  };
   trades: Trade[];
-  finalBalance: number;
-  netProfit: number;
-  winRate: number;
-  maxDrawdown: number;
-  equityCurve: number[];
+  equityCurve: { timestamp: number; price: number; balance: number }[];
+}
+
+export interface BacktestRequest {
+  csvFilePath: string;
+  rules: StrategyRules;
+  initialBalance?: number;
 }

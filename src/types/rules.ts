@@ -9,9 +9,14 @@ export interface ComparisonRule {
 }
 
 export interface LogicalRule {
-  type: 'logical';
+  type: 'operator'; // Fixed: was 'logical' in previous code but frontend sends 'operator'
   operator: LogicalOperator;
   conditions: Rule[];
 }
 
 export type Rule = ComparisonRule | LogicalRule;
+
+export interface StrategyRules {
+  entry: Rule;
+  exit: Rule;
+}

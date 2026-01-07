@@ -33,7 +33,8 @@ export const executeBacktest = async (req: Request, res: Response) => {
         return res.status(400).json({ error: 'No data found in CSV file' });
     }
 
-    const result = runBacktest(candles, rules, Number(initialBalance) || 10000);
+    // Pass default commission if not provided
+    const result = runBacktest(candles, rules, Number(initialBalance) || 10000, 0.001);
 
     res.json(result);
   } catch (error: any) {

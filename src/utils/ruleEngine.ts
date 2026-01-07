@@ -3,7 +3,7 @@ import { Rule, ComparisonRule, LogicalRule } from '../types/rules';
 export function evaluateRule(rule: Rule, data: Record<string, number>): boolean {
   if (rule.type === 'comparison') {
     return evaluateComparison(rule, data);
-  } else if (rule.type === 'logical') {
+  } else if (rule.type === 'operator') {
     return evaluateLogical(rule, data);
   }
   return false;

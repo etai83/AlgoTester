@@ -1,65 +1,103 @@
 import { OHLCV } from '../types/ohlcv';
-import { BacktestConfig, BacktestResult, Trade } from '../types/backtest';
+import { StrategyRules } from '../types/rules';
+import { BacktestResult, Trade } from '../types/backtest';
 import { evaluateRule } from './ruleEngine';
+import { calculateSMA, calculateEMA, calculateRSI } from './indicators';
 
 export function runBacktest(
-  data: (OHLCV & Record<string, number>)[],
-  config: BacktestConfig
+  data: OHLCV[],
+  rules: StrategyRules,
+  initialBalance: number,
+  commission: number = 0
 ): BacktestResult {
-  let balance = config.initialBalance;
+  // 1. Prepare Data with Indicators
+  const prices = data.map(d => d.close);
+  const sma50 = calculateSMA(prices, 50);
+  const sma200 = calculateSMA(prices, 200);
+  const ema9 = calculateEMA(prices, 9);
+  const ema21 = calculateEMA(prices, 21);
+  const rsi14 = calculateRSI(prices, 14);
+
+  const enrichedData = data.map((d, i) => ({
+    ...d,
+    Close: d.close, // Alias for rule engine (capitalized)
+    Open: d.open,
+    High: d.high,
+    Low: d.low,
+    Volume: d.volume,
+    SMA_50: sma50[i] ?? undefined,
+    SMA_200: sma200[i] ?? undefined,
+    EMA_9: ema9[i] ?? undefined,
+    EMA_21: ema21[i] ?? undefined,
+    RSI: rsi14[i] ?? undefined
+  })) as (OHLCV & Record<string, number | undefined>)[];
+
+  // 2. Simulation Loop
+  let balance = initialBalance;
   let currentTrade: Trade | null = null;
   const trades: Trade[] = [];
-  const equityCurve: number[] = [];
+  const equityCurve: { timestamp: number; price: number; balance: number }[] = [];
   let peakBalance = balance;
   let maxDrawdown = 0;
 
-  for (let i = 0; i < data.length; i++) {
-    const bar = data[i];
+  for (let i = 0; i < enrichedData.length; i++) {
+    const bar = enrichedData[i];
+    if (!bar) continue; // Safety check for noUncheckedIndexedAccess
+
+    // Check for signals only if we have a next bar to execute on
+    const nextBar = enrichedData[i + 1];
 
     if (!currentTrade) {
-      if (evaluateRule(config.entryRule, bar)) {
-        const nextBar = data[i + 1];
+      if (evaluateRule(rules.entry, bar as Record<string, number>)) {
         if (nextBar) {
           const entryPrice = nextBar.open;
-          const commissionCost = balance * config.commission;
-          const netBalance = balance - commissionCost;
-          const quantity = netBalance / entryPrice;
+          const quantity = (balance * (1 - commission)) / entryPrice;
           
-          currentTrade = {
-            entryTimestamp: nextBar.timestamp,
-            entryPrice,
-            quantity,
-            status: 'open'
-          };
-          balance = 0;
+          if (quantity > 0) {
+             currentTrade = {
+              type: 'BUY',
+              timestamp: nextBar.timestamp,
+              price: entryPrice,
+              quantity,
+              status: 'OPEN'
+            };
+            balance = 0; // All in
+          }
         }
       }
     } else {
-      if (evaluateRule(config.exitRule, bar)) {
-        const nextBar = data[i + 1];
+      if (evaluateRule(rules.exit, bar as Record<string, number>)) {
         if (nextBar) {
           const exitPrice = nextBar.open;
           const grossValue = currentTrade.quantity * exitPrice;
-          const commissionCost = grossValue * config.commission;
+          const commissionCost = grossValue * commission;
           balance = grossValue - commissionCost;
           
-          currentTrade.exitTimestamp = nextBar.timestamp;
-          currentTrade.exitPrice = exitPrice;
-          currentTrade.profit = balance - (currentTrade.entryPrice * currentTrade.quantity * (1 + config.commission));
-          currentTrade.profitPercentage = (currentTrade.profit / (currentTrade.entryPrice * currentTrade.quantity)) * 100;
-          currentTrade.status = 'closed';
+          currentTrade.status = 'CLOSED';
+          currentTrade.profit = balance - (currentTrade.price * currentTrade.quantity / (1 - commission)); 
           
-          trades.push({ ...currentTrade });
+          trades.push({ 
+              ...currentTrade, 
+              type: 'SELL', 
+              timestamp: nextBar.timestamp,
+              price: exitPrice,
+              profit: balance - (currentTrade.quantity * currentTrade.price)
+          });
           currentTrade = null;
         }
       }
     }
 
+    // Update Equity Curve
     const currentEquity = currentTrade 
       ? currentTrade.quantity * bar.close 
       : balance;
     
-    equityCurve.push(currentEquity);
+    equityCurve.push({
+        timestamp: bar.timestamp,
+        price: bar.close,
+        balance: currentEquity
+    });
     
     if (currentEquity > peakBalance) {
       peakBalance = currentEquity;
@@ -71,20 +109,29 @@ export function runBacktest(
     }
   }
 
-  const finalBalance = currentTrade 
-    ? currentTrade.quantity * data[data.length - 1].close 
-    : balance;
+  // Close open trade at end for stats
+  if (currentTrade) {
+      const lastBar = enrichedData[enrichedData.length - 1];
+      if (lastBar) {
+        const lastPrice = lastBar.close;
+        const grossValue = currentTrade.quantity * lastPrice;
+        balance = grossValue * (1 - commission);
+      }
+  }
 
+  const netProfit = balance - initialBalance;
   const winningTrades = trades.filter(t => (t.profit || 0) > 0);
   const winRate = trades.length > 0 ? winningTrades.length / trades.length : 0;
-  const netProfit = finalBalance - config.initialBalance;
 
   return {
+    stats: {
+        finalBalance: balance,
+        totalProfit: netProfit,
+        winRate,
+        maxDrawdown,
+        totalTrades: trades.length
+    },
     trades,
-    finalBalance,
-    netProfit,
-    winRate,
-    maxDrawdown,
     equityCurve
   };
 }

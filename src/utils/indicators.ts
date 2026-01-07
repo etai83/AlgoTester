@@ -22,38 +22,56 @@ export function calculateEMA(prices: number[], period: number): (number | null)[
       const sum = prices.slice(0, period).reduce((a, b) => a + b, 0);
       ema.push(sum / period);
     } else {
-      const prevEma = ema[i - 1] as number;
-      ema.push((prices[i] - prevEma) * multiplier + prevEma);
+      const currentPrice = prices[i];
+      const prevEma = ema[i - 1];
+      if (typeof currentPrice === 'number' && typeof prevEma === 'number') {
+        ema.push((currentPrice - prevEma) * multiplier + prevEma);
+      } else {
+        ema.push(null);
+      }
     }
   }
   return ema;
 }
 
 export function calculateRSI(prices: number[], period: number): (number | null)[] {
+  if (prices.length === 0) return [];
+  
   const rsi: (number | null)[] = [];
   const gains: number[] = [];
   const losses: number[] = [];
 
+  // Calculate changes first
   for (let i = 1; i < prices.length; i++) {
-    const change = prices[i] - prices[i - 1];
-    gains.push(Math.max(0, change));
-    losses.push(Math.max(0, -change));
+    const currentPrice = prices[i];
+    const prevPrice = prices[i - 1];
+    
+    if (typeof currentPrice === 'number' && typeof prevPrice === 'number') {
+      const change = currentPrice - prevPrice;
+      gains.push(Math.max(0, change));
+      losses.push(Math.max(0, -change));
+    } else {
+        gains.push(0);
+        losses.push(0);
+    }
   }
 
   let avgGain = 0;
   let avgLoss = 0;
 
+  // Initialize averages
+  if (gains.length >= period) {
+      for(let i = 0; i < period; i++) {
+          avgGain += gains[i] || 0;
+          avgLoss += losses[i] || 0;
+      }
+      avgGain /= period;
+      avgLoss /= period;
+  }
+
   for (let i = 0; i < prices.length; i++) {
     if (i < period) {
       rsi.push(null);
-      if (i > 0) {
-        avgGain += gains[i - 1];
-        avgLoss += losses[i - 1];
-      }
-      if (i === period - 1) {
-        avgGain /= period;
-        avgLoss /= period;
-      }
     } else if (i === period) {
       if (avgLoss === 0) {
         rsi.push(100);
@@ -62,8 +80,14 @@ export function calculateRSI(prices: number[], period: number): (number | null)[
         rsi.push(100 - 100 / (1 + rs));
       }
     } else {
-      avgGain = (avgGain * (period - 1) + gains[i - 1]) / period;
-      avgLoss = (avgLoss * (period - 1) + losses[i - 1]) / period;
+      const currentGain = gains[i - 1];
+      const currentLoss = losses[i - 1];
+      
+      if (typeof currentGain === 'number' && typeof currentLoss === 'number') {
+          avgGain = (avgGain * (period - 1) + currentGain) / period;
+          avgLoss = (avgLoss * (period - 1) + currentLoss) / period;
+      }
+
       if (avgLoss === 0) {
         rsi.push(100);
       } else {
