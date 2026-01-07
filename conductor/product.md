@@ -1,10 +1,10 @@
 # Initial Concept
 
-I want to build an app that will backtest trading algorithms in tradingview. I want to create a POC that will get a set of rules and will backtest their profit and other measurement for the BTCUSD
+I want to build an app called **AlgoTester** that will backtest trading algorithms in tradingview. I want to create a POC that will get a set of rules and will backtest their profit and other measurement for the BTCUSD
 
 # Product Vision
 
-This Proof of Concept (POC) aims to provide developers building automated trading bots with a streamlined web application for backtesting trading strategies against BTCUSD historical data. The application will bridge the gap between complex algorithmic development and accessible validation by offering an intuitive interface for rule definition and performance analysis.
+**AlgoTester** aims to provide developers building automated trading bots with a streamlined web application for backtesting trading strategies against BTCUSD historical data. The application will bridge the gap between complex algorithmic development and accessible validation by offering an intuitive interface for rule definition and performance analysis.
 
 # Target Audience
 

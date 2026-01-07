@@ -53,7 +53,7 @@ function Dashboard() {
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       <header className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-white">Backtester POC</h1>
+          <h1 className="text-3xl font-bold text-white">AlgoTester</h1>
           <p className="text-gray-400">Define rules and test your BTCUSD strategy.</p>
         </div>
         <div className="flex space-x-4">
