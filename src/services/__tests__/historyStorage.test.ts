@@ -29,7 +29,7 @@ describe('History Storage Service', () => {
     const rules = {} as any;
     const initialBalance = 10000;
 
-    await saveSimulation(result, rules, initialBalance);
+    await saveSimulation(result, rules, initialBalance, 'test_file.csv');
 
     expect(fs.readFile).toHaveBeenCalledWith('history.json', 'utf-8');
     expect(fs.writeFile).toHaveBeenCalled();
