@@ -5,4 +5,5 @@ export interface OHLCV {
   low: number;
   close: number;
   volume: number;
+  [key: string]: number; // Allow for dynamic indicator fields
 }

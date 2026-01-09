@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { parseCsv } from '../utils/csvParser';
 import { runBacktest } from '../utils/simulator';
+import { calculateIndicators } from '../utils/indicators';
 import { BacktestRequest } from '../types/backtest';
 import { saveSimulation } from '../services/storageService';
 
@@ -29,10 +30,13 @@ export const executeBacktest = async (req: Request, res: Response) => {
         return res.status(400).json({ error: 'Valid entry and exit rules are required' });
     }
 
-    const candles = await parseCsv(csvFilePath);
+    let candles = await parseCsv(csvFilePath);
     if (candles.length === 0) {
         return res.status(400).json({ error: 'No data found in CSV file' });
     }
+
+    // Enrich with indicators
+    candles = calculateIndicators(candles);
 
     // Pass default commission if not provided
     const initBalance = Number(initialBalance) || 10000;
