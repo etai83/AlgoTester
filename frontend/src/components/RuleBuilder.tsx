@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, forwardRef, useImperativeHandle } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 
 interface Condition {
@@ -8,38 +8,43 @@ interface Condition {
   right: string | number;
 }
 
+export interface RuleBuilderHandle {
+  getRule: () => any;
+}
+
 interface RuleBuilderProps {
-  onChange: (rule: any) => void;
   title?: string;
 }
 
-export default function RuleBuilder({ onChange, title = "Rule Builder" }: RuleBuilderProps) {
+const RuleBuilder = forwardRef<RuleBuilderHandle, RuleBuilderProps>(({ title = "Rule Builder" }, ref) => {
   const [conditions, setConditions] = useState<Condition[]>([
     { id: crypto.randomUUID(), left: 'Close', operator: '>', right: 'SMA_50' }
   ]);
   const [logicOperator, setLogicOperator] = useState<'AND' | 'OR'>('AND');
 
-  useEffect(() => {
-    if (conditions.length === 1) {
-      onChange({
-        type: 'comparison',
-        left: conditions[0].left,
-        operator: conditions[0].operator,
-        right: conditions[0].right
-      });
-    } else {
-      onChange({
-        type: 'operator',
-        operator: logicOperator,
-        conditions: conditions.map(c => ({
+  useImperativeHandle(ref, () => ({
+    getRule: () => {
+      if (conditions.length === 1) {
+        return {
           type: 'comparison',
-          left: c.left,
-          operator: c.operator,
-          right: c.right
-        }))
-      });
+          left: conditions[0].left,
+          operator: conditions[0].operator,
+          right: conditions[0].right
+        };
+      } else {
+        return {
+          type: 'operator',
+          operator: logicOperator,
+          conditions: conditions.map(c => ({
+            type: 'comparison',
+            left: c.left,
+            operator: c.operator,
+            right: c.right
+          }))
+        };
+      }
     }
-  }, [conditions, logicOperator, onChange]);
+  }));
 
   const addCondition = () => {
     setConditions([
@@ -141,4 +146,6 @@ export default function RuleBuilder({ onChange, title = "Rule Builder" }: RuleBu
       </button>
     </div>
   );
-}
+});
+
+export default RuleBuilder;
