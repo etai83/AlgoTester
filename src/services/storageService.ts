@@ -32,7 +32,13 @@ export async function saveStrategy(strategy: Omit<Strategy, 'id'>): Promise<Stra
 export async function loadStrategies(): Promise<Strategy[]> {
   try {
     const content = await fs.readFile(STORAGE_FILE, 'utf-8');
-    return JSON.parse(content);
+    try {
+      return JSON.parse(content);
+    } catch (error) {
+      console.error(`Error parsing ${STORAGE_FILE}:`, error);
+      await fs.writeFile(`${STORAGE_FILE}.corrupted.${Date.now()}`, content);
+      return [];
+    }
   } catch (error: any) {
     if (error.code === 'ENOENT') {
       return [];
@@ -59,7 +65,13 @@ export async function saveSimulation(result: BacktestResult, rules: StrategyRule
 export async function loadHistory(): Promise<HistoryItem[]> {
     try {
         const content = await fs.readFile(HISTORY_FILE, 'utf-8');
-        return JSON.parse(content);
+        try {
+            return JSON.parse(content);
+        } catch (error) {
+            console.error(`Error parsing ${HISTORY_FILE}:`, error);
+            await fs.writeFile(`${HISTORY_FILE}.corrupted.${Date.now()}`, content);
+            return [];
+        }
     } catch (error: any) {
         if (error.code === 'ENOENT') {
             return [];
