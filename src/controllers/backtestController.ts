@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import path from 'path';
 import { parseCsv } from '../utils/csvParser';
 import { runBacktest } from '../utils/simulator';
 import { calculateIndicators } from '../utils/indicators';
@@ -22,6 +23,13 @@ export const executeBacktest = async (req: Request, res: Response) => {
         csvFilePath = req.file.path;
     }
 
+    let fileName = 'Unknown';
+    if (req.file) {
+        fileName = req.file.originalname;
+    } else if (csvFilePath) {
+        fileName = path.basename(csvFilePath);
+    }
+
     if (!csvFilePath) {
       return res.status(400).json({ error: 'csvFilePath or file upload is required' });
     }
@@ -43,7 +51,7 @@ export const executeBacktest = async (req: Request, res: Response) => {
     const result = runBacktest(candles, rules, initBalance, 0.001);
     
     // Save to history
-    await saveSimulation(result, rules, initBalance);
+    await saveSimulation(result, rules, initBalance, fileName);
 
     res.json(result);
   } catch (error: any) {

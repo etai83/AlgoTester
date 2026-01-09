@@ -56,6 +56,11 @@ function History() {
                     <Calendar size={16} />
                     <span>{new Date(item.timestamp).toLocaleString()}</span>
                 </div>
+                {item.fileName && (
+                   <div className="text-gray-400 text-sm border-l border-gray-600 pl-4 h-5 flex items-center">
+                       {item.fileName}
+                   </div>
+                )}
                 <div className={`font-semibold ${item.stats.totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                     {item.stats.totalProfit >= 0 ? '+' : ''}{item.stats.totalProfit.toFixed(2)} ({((item.stats.totalProfit / item.initialBalance) * 100).toFixed(2)}%)
                 </div>
