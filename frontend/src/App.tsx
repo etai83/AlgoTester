@@ -69,6 +69,9 @@ function App() {
       <Routes>
         <Route path="/" element={<Dashboard />} />
       </Routes>
+      <div className="fixed bottom-2 right-2 text-xs text-gray-500">
+        v{__APP_VERSION__}
+      </div>
     </div>
   );
 }
