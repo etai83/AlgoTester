@@ -37,5 +37,44 @@
       }
     },
     "initialBalance": 10000
+  },
+  {
+    "stats": {
+      "finalBalance": 10004.08722557298,
+      "totalProfit": 4.0872255729791505,
+      "winRate": 0,
+      "maxDrawdown": 0.001,
+      "totalTrades": 0
+    },
+    "trades": [],
+    "equityCurve": [
+      {
+        "timestamp": 1672531200000,
+        "price": 16580,
+        "balance": 9990
+      },
+      {
+        "timestamp": 1672534800000,
+        "price": 16620,
+        "balance": 10014.10132689988
+      }
+    ],
+    "id": "d6ee1118-68ec-4dc3-9823-2e3a851bf49d",
+    "timestamp": 1767954611411,
+    "rules": {
+      "entry": {
+        "type": "comparison",
+        "left": "Close",
+        "operator": ">",
+        "right": 100
+      },
+      "exit": {
+        "type": "comparison",
+        "left": "Close",
+        "operator": ">",
+        "right": 200
+      }
+    },
+    "initialBalance": 10000
   }
 ]

@@ -63,6 +63,9 @@ const RuleBuilder = forwardRef<RuleBuilderHandle, RuleBuilderProps>(({ title = "
     setConditions(conditions.map(c => c.id === id ? { ...c, [field]: value } : c));
   };
 
+  const INDICATORS = ['SMA_20', 'SMA_50', 'SMA_100', 'SMA_150', 'SMA_200', 'RSI'];
+  const LEFT_INDICATORS = ['Close', 'EMA_9', 'EMA_21', ...INDICATORS];
+
   return (
     <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-xl">
       <h3 className="text-xl font-semibold mb-4 text-blue-400">{title}</h3>
@@ -83,7 +86,9 @@ const RuleBuilder = forwardRef<RuleBuilderHandle, RuleBuilderProps>(({ title = "
       )}
 
       <div className="space-y-3">
-        {conditions.map((condition) => (
+        {conditions.map((condition) => {
+          const isCustom = !INDICATORS.includes(String(condition.right));
+          return (
           <div key={condition.id} className="flex items-center space-x-3 bg-gray-900 p-3 rounded border border-gray-700">
             <div className="flex-1 grid grid-cols-3 gap-3">
               <div>
@@ -93,12 +98,9 @@ const RuleBuilder = forwardRef<RuleBuilderHandle, RuleBuilderProps>(({ title = "
                   onChange={(e) => updateCondition(condition.id, 'left', e.target.value)}
                   className="w-full bg-gray-800 text-white rounded px-2 py-1 text-sm border border-gray-700"
                 >
-                  <option value="Close">Close</option>
-                  <option value="SMA_50">SMA 50</option>
-                  <option value="SMA_200">SMA 200</option>
-                  <option value="EMA_9">EMA 9</option>
-                  <option value="EMA_21">EMA 21</option>
-                  <option value="RSI">RSI</option>
+                  {LEFT_INDICATORS.map(ind => (
+                    <option key={ind} value={ind}>{ind.replace('_', ' ')}</option>
+                  ))}
                 </select>
               </div>
               <div>
@@ -117,12 +119,32 @@ const RuleBuilder = forwardRef<RuleBuilderHandle, RuleBuilderProps>(({ title = "
               </div>
               <div>
                 <label className="block text-xs text-gray-500 mb-1">Value</label>
-                <input
-                  type="text"
-                  value={condition.right}
-                  onChange={(e) => updateCondition(condition.id, 'right', e.target.value)}
-                  className="w-full bg-gray-800 text-white rounded px-2 py-1 text-sm border border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
+                <div className="flex space-x-2">
+                  <select
+                    value={isCustom ? 'CUSTOM' : condition.right}
+                    onChange={(e) => {
+                      if (e.target.value === 'CUSTOM') {
+                        updateCondition(condition.id, 'right', 0);
+                      } else {
+                        updateCondition(condition.id, 'right', e.target.value);
+                      }
+                    }}
+                    className="flex-1 bg-gray-800 text-white rounded px-2 py-1 text-sm border border-gray-700"
+                  >
+                    <option value="CUSTOM">Custom Value</option>
+                    {INDICATORS.map(ind => (
+                      <option key={ind} value={ind}>{ind.replace('_', ' ')}</option>
+                    ))}
+                  </select>
+                  {isCustom && (
+                    <input
+                      type="number"
+                      value={condition.right}
+                      onChange={(e) => updateCondition(condition.id, 'right', Number(e.target.value))}
+                      className="w-24 bg-gray-800 text-white rounded px-2 py-1 text-sm border border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  )}
+                </div>
               </div>
             </div>
             {conditions.length > 1 && (
@@ -134,7 +156,7 @@ const RuleBuilder = forwardRef<RuleBuilderHandle, RuleBuilderProps>(({ title = "
               </button>
             )}
           </div>
-        ))}
+        )})}
       </div>
 
       <button

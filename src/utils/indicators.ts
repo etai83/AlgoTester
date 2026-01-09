@@ -1,3 +1,5 @@
+import { OHLCV } from '../types/ohlcv';
+
 export function calculateSMA(prices: number[], period: number): (number | null)[] {
   const sma: (number | null)[] = [];
   for (let i = 0; i < prices.length; i++) {
@@ -98,4 +100,26 @@ export function calculateRSI(prices: number[], period: number): (number | null)[
   }
 
   return rsi;
+}
+
+export function calculateIndicators(candles: OHLCV[]): OHLCV[] {
+  const closes = candles.map(c => c.close);
+  
+  const sma20 = calculateSMA(closes, 20);
+  const sma50 = calculateSMA(closes, 50);
+  const sma100 = calculateSMA(closes, 100);
+  const sma150 = calculateSMA(closes, 150);
+  const sma200 = calculateSMA(closes, 200);
+  const rsi = calculateRSI(closes, 14);
+
+  return candles.map((candle, i) => {
+    const enriched = { ...candle };
+    if (sma20[i] !== null) enriched['SMA_20'] = sma20[i]!;
+    if (sma50[i] !== null) enriched['SMA_50'] = sma50[i]!;
+    if (sma100[i] !== null) enriched['SMA_100'] = sma100[i]!;
+    if (sma150[i] !== null) enriched['SMA_150'] = sma150[i]!;
+    if (sma200[i] !== null) enriched['SMA_200'] = sma200[i]!;
+    if (rsi[i] !== null) enriched['RSI'] = rsi[i]!;
+    return enriched;
+  });
 }
