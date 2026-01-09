@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import RuleBuilder from './RuleBuilder';
+import RuleBuilder, { type RuleBuilderHandle } from './RuleBuilder';
 import MetricsSummary from './MetricsSummary';
 import EquityCurve from './EquityCurve';
 import PriceChart from './PriceChart';
@@ -8,8 +8,8 @@ import { runBacktest, previewCsv } from '../services/api';
 import { Play, Loader2, Upload } from 'lucide-react';
 
 function Simulator() {
-  const [entryRule, setEntryRule] = useState<any>(null);
-  const [exitRule, setExitRule] = useState<any>(null);
+  const entryRuleRef = useRef<RuleBuilderHandle>(null);
+  const exitRuleRef = useRef<RuleBuilderHandle>(null);
   const [file, setFile] = useState<File | null>(null);
   const [previewData, setPreviewData] = useState<any[] | null>(null);
   const [initialBalance, setInitialBalance] = useState(10000);
@@ -23,6 +23,15 @@ function Simulator() {
       setError("Please upload a CSV file");
       return;
     }
+
+    const entryRule = entryRuleRef.current?.getRule();
+    const exitRule = exitRuleRef.current?.getRule();
+
+    if (!entryRule || !exitRule) {
+       setError("Invalid rules configuration");
+       return;
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -61,7 +70,14 @@ function Simulator() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-500 relative">
+      {loading && (
+        <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center flex-col space-y-4">
+          <Loader2 className="animate-spin text-blue-500 w-12 h-12" />
+          <span className="text-xl font-semibold text-blue-400">Running Simulation...</span>
+        </div>
+      )}
+
       <header className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-white">Simulator</h2>
@@ -93,8 +109,8 @@ function Simulator() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <RuleBuilder title="Entry Rules" onChange={setEntryRule} />
-        <RuleBuilder title="Exit Rules" onChange={setExitRule} />
+        <RuleBuilder title="Entry Rules" ref={entryRuleRef} />
+        <RuleBuilder title="Exit Rules" ref={exitRuleRef} />
       </div>
 
       <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-xl flex items-center">
@@ -108,7 +124,7 @@ function Simulator() {
           />
           <button
             onClick={handleRunBacktest}
-            disabled={loading || !entryRule || !exitRule || !file}
+            disabled={loading || !file}
             className="mt-4 w-full flex justify-center items-center space-x-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg"
           >
             {loading ? <Loader2 className="animate-spin" size={20} /> : <Play size={20} />}
