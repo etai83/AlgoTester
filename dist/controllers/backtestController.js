@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.previewData = exports.executeBacktest = void 0;
 const csvParser_1 = require("../utils/csvParser");
 const simulator_1 = require("../utils/simulator");
+const storageService_1 = require("../services/storageService");
 const executeBacktest = async (req, res) => {
     try {
         let { csvFilePath, rules, initialBalance } = req.body;
@@ -29,7 +30,10 @@ const executeBacktest = async (req, res) => {
             return res.status(400).json({ error: 'No data found in CSV file' });
         }
         // Pass default commission if not provided
-        const result = (0, simulator_1.runBacktest)(candles, rules, Number(initialBalance) || 10000, 0.001);
+        const initBalance = Number(initialBalance) || 10000;
+        const result = (0, simulator_1.runBacktest)(candles, rules, initBalance, 0.001);
+        // Save to history
+        await (0, storageService_1.saveSimulation)(result, rules, initBalance);
         res.json(result);
     }
     catch (error) {

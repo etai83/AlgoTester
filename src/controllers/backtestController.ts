@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { parseCsv } from '../utils/csvParser';
 import { runBacktest } from '../utils/simulator';
 import { BacktestRequest } from '../types/backtest';
+import { saveSimulation } from '../services/storageService';
 
 export const executeBacktest = async (req: Request, res: Response) => {
   try {
@@ -34,7 +35,11 @@ export const executeBacktest = async (req: Request, res: Response) => {
     }
 
     // Pass default commission if not provided
-    const result = runBacktest(candles, rules, Number(initialBalance) || 10000, 0.001);
+    const initBalance = Number(initialBalance) || 10000;
+    const result = runBacktest(candles, rules, initBalance, 0.001);
+    
+    // Save to history
+    await saveSimulation(result, rules, initBalance);
 
     res.json(result);
   } catch (error: any) {

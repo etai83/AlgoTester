@@ -33,3 +33,8 @@ export const previewCsv = async (file: File) => {
   });
   return response.data;
 };
+
+export const fetchHistory = async () => {
+  const response = await axios.get(`${API_BASE_URL}/api/history`);
+  return response.data;
+};
