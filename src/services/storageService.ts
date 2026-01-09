@@ -17,6 +17,7 @@ export interface HistoryItem extends BacktestResult {
   timestamp: number;
   rules: StrategyRules;
   initialBalance: number;
+  fileName: string;
 }
 
 export async function saveStrategy(strategy: Omit<Strategy, 'id'>): Promise<Strategy> {
@@ -40,14 +41,15 @@ export async function loadStrategies(): Promise<Strategy[]> {
   }
 }
 
-export async function saveSimulation(result: BacktestResult, rules: StrategyRules, initialBalance: number): Promise<HistoryItem> {
+export async function saveSimulation(result: BacktestResult, rules: StrategyRules, initialBalance: number, fileName: string): Promise<HistoryItem> {
     const history = await loadHistory();
     const newHistoryItem: HistoryItem = {
         ...result,
         id: crypto.randomUUID(),
         timestamp: Date.now(),
         rules,
-        initialBalance
+        initialBalance,
+        fileName
     };
     history.push(newHistoryItem);
     await fs.writeFile(HISTORY_FILE, JSON.stringify(history, null, 2));
