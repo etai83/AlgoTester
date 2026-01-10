@@ -17,3 +17,4 @@ export default defineConfig({
     setupFiles: './src/test/setup.ts',
   },
 });
+// Force restart for tailwind config

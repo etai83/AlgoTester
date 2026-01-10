@@ -5,9 +5,8 @@ import EquityCurve from './EquityCurve';
 import PriceChart from './PriceChart';
 import ReturnsHistogram from './ReturnsHistogram';
 import { runBacktest, previewCsv } from '../services/api';
-import { Play, Loader2, Upload } from 'lucide-react';
 
-function Simulator() {
+export default function Simulator() {
   const entryRuleRef = useRef<RuleBuilderHandle>(null);
   const exitRuleRef = useRef<RuleBuilderHandle>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -28,8 +27,8 @@ function Simulator() {
     const exitRule = exitRuleRef.current?.getRule();
 
     if (!entryRule || !exitRule) {
-       setError("Invalid rules configuration");
-       return;
+      setError("Invalid rules configuration");
+      return;
     }
 
     setLoading(true);
@@ -59,7 +58,7 @@ function Simulator() {
       setResults(null);
       setPreviewData(null);
       setError(null);
-      
+
       try {
         const data = await previewCsv(selectedFile);
         setPreviewData(data);
@@ -70,96 +69,107 @@ function Simulator() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 relative">
+    <div className="flex-1 flex flex-col min-w-0 overflow-hidden h-full">
       {loading && (
-        <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center flex-col space-y-4">
-          <Loader2 className="animate-spin text-blue-500 w-12 h-12" />
-          <span className="text-xl font-semibold text-blue-400">Running Simulation...</span>
+        <div className="fixed inset-0 bg-background-dark/80 backdrop-blur-sm z-50 flex items-center justify-center flex-col space-y-4">
+          <span className="material-symbols-outlined text-primary text-5xl animate-spin">progress_activity</span>
+          <span className="text-xl font-semibold text-primary">Running Simulation...</span>
         </div>
       )}
 
-      <header className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-white">Simulator</h2>
-          <p className="text-gray-400">Define rules and test your BTCUSD strategy.</p>
-        </div>
-        <div className="flex space-x-4">
-           <button
-            onClick={() => fileInputRef.current?.click()}
-            className="flex items-center space-x-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-3 rounded-lg font-semibold transition-colors border border-gray-600"
-          >
-            <Upload size={20} />
-            <span>{file ? file.name : 'Upload CSV'}</span>
-          </button>
-          <input 
-            type="file" 
-            accept=".csv" 
-            ref={fileInputRef} 
-            onChange={handleFileChange} 
-            className="hidden" 
-          />
+      <header className="bg-surface-darker border-b border-border-dark px-6 py-5 flex flex-col gap-6 sticky top-0 z-20 shrink-0">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-white tracking-tight">Backtest Simulator</h2>
+            <p className="text-slate-400 text-sm mt-1">Define rules and test your BTCUSD strategy.</p>
+          </div>
+          <div className="flex space-x-4">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center space-x-2 bg-surface-dark hover:bg-white/5 text-white px-4 py-2.5 rounded-lg font-medium transition-colors border border-border-dark"
+            >
+              <span className="material-symbols-outlined text-[20px]">upload_file</span>
+              <span>{file ? file.name : 'Upload CSV'}</span>
+            </button>
+            <input
+              type="file"
+              accept=".csv"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </div>
         </div>
       </header>
 
-      {error && (
-        <div className="bg-red-900/50 border border-red-500 text-red-200 p-4 rounded-lg">
-          <p className="font-semibold">Error</p>
-          <p className="text-sm">{error}</p>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <RuleBuilder title="Entry Rules" ref={entryRuleRef} />
-        <RuleBuilder title="Exit Rules" ref={exitRuleRef} />
-      </div>
-
-      <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-xl flex items-center">
-        <div className="w-48">
-          <label className="block text-xs text-gray-500 mb-1 uppercase tracking-wider">Initial Balance ($)</label>
-          <input
-            type="number"
-            value={initialBalance}
-            onChange={(e) => setInitialBalance(Number(e.target.value))}
-            className="w-full bg-gray-900 text-white rounded px-3 py-2 border border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
-          <button
-            onClick={handleRunBacktest}
-            disabled={loading || !file}
-            className="mt-4 w-full flex justify-center items-center space-x-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg"
-          >
-            {loading ? <Loader2 className="animate-spin" size={20} /> : <Play size={20} />}
-            <span>{loading ? 'Running...' : 'Run Backtest'}</span>
-          </button>
-        </div>
-      </div>
-
-      {results && (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <MetricsSummary stats={results.stats} />
-          
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-            <EquityCurve data={results.equityCurve} />
-            <ReturnsHistogram trades={results.trades} />
+      <div className="flex-1 overflow-y-auto p-6 space-y-8">
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/20 text-red-200 p-4 rounded-xl flex items-center gap-3">
+            <span className="material-symbols-outlined text-red-500">error</span>
+            <div>
+              <p className="font-semibold text-red-400">Error</p>
+              <p className="text-sm">{error}</p>
+            </div>
           </div>
+        )}
 
-          <PriceChart 
-            data={results.equityCurve.map((p: any) => ({ timestamp: p.timestamp, close: p.price }))} 
-            trades={results.trades} 
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <RuleBuilder title="Entry Rules" ref={entryRuleRef} />
+          <RuleBuilder title="Exit Rules" ref={exitRuleRef} />
         </div>
-      )}
 
-      {previewData && !results && (
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-           <h2 className="text-2xl font-bold text-white mb-4">Data Preview</h2>
-           <PriceChart 
-            data={previewData} 
-            trades={[]} 
-          />
+        <div className="bg-surface-dark p-6 rounded-xl border border-border-dark shadow-sm">
+          <div className="max-w-md">
+            <label className="block text-xs text-slate-400 mb-1.5 uppercase tracking-wider font-semibold">Initial Balance ($)</label>
+            <div className="flex gap-4">
+              <input
+                type="number"
+                value={initialBalance}
+                onChange={(e) => setInitialBalance(Number(e.target.value))}
+                className="flex-1 bg-[#1c1f27] text-white rounded-lg px-3 py-2.5 border border-border-dark focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all shadow-inner"
+              />
+              <button
+                onClick={handleRunBacktest}
+                disabled={loading || !file}
+                className="flex items-center space-x-2 bg-primary hover:bg-blue-600 disabled:bg-slate-700 disabled:text-slate-500 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors shadow-lg shadow-primary/20 whitespace-nowrap"
+              >
+                {loading ? (
+                  <span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>
+                ) : (
+                  <span className="material-symbols-outlined text-[20px]">play_arrow</span>
+                )}
+                <span>{loading ? 'Running...' : 'Run Backtest'}</span>
+              </button>
+            </div>
+          </div>
         </div>
-      )}
+
+        {results && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <MetricsSummary stats={results.stats} />
+
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+              <EquityCurve data={results.equityCurve} />
+              <ReturnsHistogram trades={results.trades} />
+            </div>
+
+            <PriceChart
+              data={results.equityCurve.map((p: any) => ({ timestamp: p.timestamp, close: p.price }))}
+              trades={results.trades}
+            />
+          </div>
+        )}
+
+        {previewData && !results && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <h2 className="text-xl font-bold text-white mb-4">Data Preview</h2>
+            <PriceChart
+              data={previewData}
+              trades={[]}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
-
-export default Simulator;

@@ -1,5 +1,4 @@
 import { useState, forwardRef, useImperativeHandle } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
 
 interface Condition {
   id: string;
@@ -73,21 +72,23 @@ const RuleBuilder = forwardRef<RuleBuilderHandle, RuleBuilderProps>(({ title = "
   const LEFT_INDICATORS = ['Close', 'EMA_9', 'EMA_21', ...INDICATORS];
 
   return (
-    <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-xl">
-      <h3 className="text-xl font-semibold mb-4 text-blue-400">{title}</h3>
-      
+    <div className="bg-surface-dark p-6 rounded-xl border border-border-dark shadow-sm">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold text-white tracking-tight">{title}</h3>
+      </div>
+
       {conditions.length > 1 && (
-        <div className="mb-4 flex items-center space-x-2">
-          <span className="text-sm text-gray-400">Match</span>
-          <select 
-            value={logicOperator} 
+        <div className="mb-4 flex items-center gap-2 bg-surface-darker/50 p-2 rounded-lg border border-border-dark/50 w-fit">
+          <span className="text-xs text-slate-400 font-medium uppercase tracking-wider pl-1">Match</span>
+          <select
+            value={logicOperator}
             onChange={(e) => setLogicOperator(e.target.value as 'AND' | 'OR')}
-            className="bg-gray-700 text-white rounded px-2 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="bg-[#1c1f27] text-white rounded px-2 py-1 text-sm border border-border-dark focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer"
           >
             <option value="AND">ALL (AND)</option>
             <option value="OR">ANY (OR)</option>
           </select>
-          <span className="text-sm text-gray-400">conditions</span>
+          <span className="text-xs text-slate-400 font-medium uppercase tracking-wider pr-1">conditions</span>
         </div>
       )}
 
@@ -95,81 +96,82 @@ const RuleBuilder = forwardRef<RuleBuilderHandle, RuleBuilderProps>(({ title = "
         {conditions.map((condition) => {
           const isCustom = !INDICATORS.includes(String(condition.right));
           return (
-          <div key={condition.id} className="flex items-center space-x-3 bg-gray-900 p-3 rounded border border-gray-700">
-            <div className="flex-1 grid grid-cols-3 gap-3">
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Indicator</label>
-                <select
-                  value={condition.left}
-                  onChange={(e) => updateCondition(condition.id, 'left', e.target.value)}
-                  className="w-full bg-gray-800 text-white rounded px-2 py-1 text-sm border border-gray-700"
-                >
-                  {LEFT_INDICATORS.map(ind => (
-                    <option key={ind} value={ind}>{ind.replace('_', ' ')}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Operator</label>
-                <select
-                  value={condition.operator}
-                  onChange={(e) => updateCondition(condition.id, 'operator', e.target.value)}
-                  className="w-full bg-gray-800 text-white rounded px-2 py-1 text-sm border border-gray-700"
-                >
-                  <option value=">">{'>'}</option>
-                  <option value="<">{'<'}</option>
-                  <option value=">=">{'>='}</option>
-                  <option value="<=">{'<='}</option>
-                  <option value="==">{'=='}</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Value</label>
-                <div className="flex space-x-2">
+            <div key={condition.id} className="flex items-center gap-3 bg-surface-darker p-3 rounded-lg border border-border-dark/50 group hover:border-border-dark transition-colors">
+              <div className="flex-1 grid grid-cols-10 gap-3">
+                <div className="col-span-4">
+                  <label className="block text-[10px] text-slate-500 mb-1 uppercase font-semibold">Indicator</label>
                   <select
-                    value={isCustom ? 'CUSTOM' : condition.right}
-                    onChange={(e) => {
-                      if (e.target.value === 'CUSTOM') {
-                        updateCondition(condition.id, 'right', 0);
-                      } else {
-                        updateCondition(condition.id, 'right', e.target.value);
-                      }
-                    }}
-                    className="flex-1 bg-gray-800 text-white rounded px-2 py-1 text-sm border border-gray-700"
+                    value={condition.left}
+                    onChange={(e) => updateCondition(condition.id, 'left', e.target.value)}
+                    className="w-full bg-[#1c1f27] text-white rounded px-2 py-1.5 text-sm border border-border-dark focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   >
-                    <option value="CUSTOM">Custom Value</option>
-                    {INDICATORS.map(ind => (
+                    {LEFT_INDICATORS.map(ind => (
                       <option key={ind} value={ind}>{ind.replace('_', ' ')}</option>
                     ))}
                   </select>
-                  {isCustom && (
-                    <input
-                      type="number"
-                      value={condition.right}
-                      onChange={(e) => updateCondition(condition.id, 'right', Number(e.target.value))}
-                      className="w-24 bg-gray-800 text-white rounded px-2 py-1 text-sm border border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                  )}
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-[10px] text-slate-500 mb-1 uppercase font-semibold">Op</label>
+                  <select
+                    value={condition.operator}
+                    onChange={(e) => updateCondition(condition.id, 'operator', e.target.value)}
+                    className="w-full bg-[#1c1f27] text-white rounded px-2 py-1.5 text-sm border border-border-dark focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-center"
+                  >
+                    <option value=">">{'>'}</option>
+                    <option value="<">{'<'}</option>
+                    <option value=">=">{'>='}</option>
+                    <option value="<=">{'<='}</option>
+                    <option value="==">{'=='}</option>
+                  </select>
+                </div>
+                <div className="col-span-4">
+                  <label className="block text-[10px] text-slate-500 mb-1 uppercase font-semibold">Value</label>
+                  <div className="flex gap-2">
+                    <select
+                      value={isCustom ? 'CUSTOM' : condition.right}
+                      onChange={(e) => {
+                        if (e.target.value === 'CUSTOM') {
+                          updateCondition(condition.id, 'right', 0);
+                        } else {
+                          updateCondition(condition.id, 'right', e.target.value);
+                        }
+                      }}
+                      className="flex-1 bg-[#1c1f27] text-white rounded px-2 py-1.5 text-sm border border-border-dark focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                    >
+                      <option value="CUSTOM">Custom</option>
+                      {INDICATORS.map(ind => (
+                        <option key={ind} value={ind}>{ind.replace('_', ' ')}</option>
+                      ))}
+                    </select>
+                    {isCustom && (
+                      <input
+                        type="number"
+                        value={condition.right}
+                        onChange={(e) => updateCondition(condition.id, 'right', Number(e.target.value))}
+                        className="w-16 bg-[#1c1f27] text-white rounded px-2 py-1.5 text-sm border border-border-dark focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
+              {conditions.length > 1 && (
+                <button
+                  onClick={() => removeCondition(condition.id)}
+                  className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors mt-4 self-start"
+                >
+                  <span className="material-symbols-outlined text-[18px]">delete</span>
+                </button>
+              )}
             </div>
-            {conditions.length > 1 && (
-              <button 
-                onClick={() => removeCondition(condition.id)}
-                className="p-1 text-gray-500 hover:text-red-400 transition-colors"
-              >
-                <Trash2 size={18} />
-              </button>
-            )}
-          </div>
-        )})}
+          )
+        })}
       </div>
 
       <button
         onClick={addCondition}
-        className="mt-4 flex items-center space-x-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+        className="mt-4 flex items-center justify-center w-full py-2 space-x-2 text-sm text-primary hover:text-white hover:bg-primary/10 border border-dashed border-primary/30 hover:border-primary/50 rounded-lg transition-all"
       >
-        <Plus size={16} />
+        <span className="material-symbols-outlined text-[18px]">add</span>
         <span>Add Condition</span>
       </button>
     </div>
