@@ -63,7 +63,13 @@ const RuleBuilder = forwardRef<RuleBuilderHandle, RuleBuilderProps>(({ title = "
     setConditions(conditions.map(c => c.id === id ? { ...c, [field]: value } : c));
   };
 
-  const INDICATORS = ['SMA_20', 'SMA_50', 'SMA_100', 'SMA_150', 'SMA_200', 'RSI'];
+  const INDICATORS = [
+    'SMA_20', 'SMA_50', 'SMA_100', 'SMA_150', 'SMA_200', 'RSI',
+    'MACD', 'MACD_Signal', 'MACD_Hist',
+    'BB_Upper', 'BB_Middle', 'BB_Lower',
+    'ATR',
+    'Stoch_K', 'Stoch_D'
+  ];
   const LEFT_INDICATORS = ['Close', 'EMA_9', 'EMA_21', ...INDICATORS];
 
   return (
