@@ -9,6 +9,7 @@ interface Condition {
 
 export interface RuleBuilderHandle {
   getRule: () => any;
+  randomize: () => void;
 }
 
 interface RuleBuilderProps {
@@ -42,6 +43,31 @@ const RuleBuilder = forwardRef<RuleBuilderHandle, RuleBuilderProps>(({ title = "
           }))
         };
       }
+    },
+    randomize: () => {
+      const randomLeft = LEFT_INDICATORS[Math.floor(Math.random() * LEFT_INDICATORS.length)];
+      const operators = ['>', '<', '>=', '<=', '=='];
+      const randomOperator = operators[Math.floor(Math.random() * operators.length)];
+
+      // 50% chance of indicator, 50% chance of custom value
+      let randomRight: string | number;
+      if (Math.random() > 0.5) {
+        randomRight = INDICATORS[Math.floor(Math.random() * INDICATORS.length)];
+        // Prevent comparing same indicator to itself if possible, though not strictly forbidden
+        if (randomRight === randomLeft) {
+          // pick another or keep it (it's valid valid comparison, e.g. SMA_50 > SMA_50 is always false/true but valid syntax)
+        }
+      } else {
+        // Random number between 1 and 100 for simplicity
+        randomRight = Math.floor(Math.random() * 100) + 1;
+      }
+
+      setConditions([{
+        id: crypto.randomUUID(),
+        left: randomLeft,
+        operator: randomOperator,
+        right: randomRight
+      }]);
     }
   }));
 

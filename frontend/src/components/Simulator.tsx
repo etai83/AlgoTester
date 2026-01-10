@@ -17,6 +17,11 @@ export default function Simulator() {
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleRandomStrategy = () => {
+    entryRuleRef.current?.randomize();
+    exitRuleRef.current?.randomize();
+  };
+
   const handleRunBacktest = async () => {
     if (!file) {
       setError("Please upload a CSV file");
@@ -128,6 +133,14 @@ export default function Simulator() {
                 onChange={(e) => setInitialBalance(Number(e.target.value))}
                 className="flex-1 bg-[#1c1f27] text-white rounded-lg px-3 py-2.5 border border-border-dark focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all shadow-inner"
               />
+              <button
+                onClick={handleRandomStrategy}
+                type="button"
+                className="flex items-center space-x-2 bg-surface-dark hover:bg-white/5 text-slate-300 hover:text-white px-4 py-2.5 rounded-lg font-medium transition-colors border border-border-dark"
+              >
+                <span className="material-symbols-outlined text-[20px]">shuffle</span>
+                <span>Random Strategy</span>
+              </button>
               <button
                 onClick={handleRunBacktest}
                 disabled={loading || !file}
