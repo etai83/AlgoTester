@@ -4,7 +4,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000
 
 export const runBacktest = async (payload: any) => {
   const formData = new FormData();
-  
+
   if (payload.file) {
     formData.append('file', payload.file);
   } else if (payload.csvFilePath) {
@@ -31,6 +31,11 @@ export const previewCsv = async (file: File) => {
       'Content-Type': 'multipart/form-data',
     },
   });
+  return response.data;
+};
+
+export const fetchLatestHistory = async () => {
+  const response = await axios.get(`${API_BASE_URL}/api/history/latest`);
   return response.data;
 };
 

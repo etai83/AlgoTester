@@ -10,7 +10,9 @@ interface Condition {
 export interface RuleBuilderHandle {
   getRule: () => any;
   randomize: () => void;
+  setRule: (rule: any) => void;
 }
+
 
 interface RuleBuilderProps {
   title?: string;
@@ -68,6 +70,34 @@ const RuleBuilder = forwardRef<RuleBuilderHandle, RuleBuilderProps>(({ title = "
         operator: randomOperator,
         right: randomRight
       }]);
+    },
+    setRule: (rule: any) => {
+      if (!rule) return;
+
+      let newConditions: Condition[] = [];
+      let newOperator: 'AND' | 'OR' = 'AND';
+
+      if (rule.type === 'operator') {
+        newOperator = rule.operator;
+        newConditions = rule.conditions.map((c: any) => ({
+          id: crypto.randomUUID(),
+          left: c.left,
+          operator: c.operator,
+          right: c.right
+        }));
+      } else if (rule.type === 'comparison') {
+        newConditions = [{
+          id: crypto.randomUUID(),
+          left: rule.left,
+          operator: rule.operator,
+          right: rule.right
+        }];
+      }
+
+      if (newConditions.length > 0) {
+        setConditions(newConditions);
+        setLogicOperator(newOperator);
+      }
     }
   }));
 

@@ -1,13 +1,20 @@
 import { OHLCV } from '../types/ohlcv';
 
+// Optimized SMA using sliding window - O(n) instead of O(n*period)
 export function calculateSMA(prices: number[], period: number): (number | null)[] {
   const sma: (number | null)[] = [];
+  let windowSum = 0;
+
   for (let i = 0; i < prices.length; i++) {
+    windowSum += prices[i]!;
+
     if (i < period - 1) {
       sma.push(null);
     } else {
-      const sum = prices.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0);
-      sma.push(sum / period);
+      if (i >= period) {
+        windowSum -= prices[i - period]!;
+      }
+      sma.push(windowSum / period);
     }
   }
   return sma;
@@ -16,21 +23,23 @@ export function calculateSMA(prices: number[], period: number): (number | null)[
 export function calculateEMA(prices: number[], period: number): (number | null)[] {
   const ema: (number | null)[] = [];
   const multiplier = 2 / (period + 1);
+  let prevEma: number | null = null;
 
   for (let i = 0; i < prices.length; i++) {
     if (i < period - 1) {
       ema.push(null);
     } else if (i === period - 1) {
-      const sum = prices.slice(0, period).reduce((a, b) => a + b, 0);
-      ema.push(sum / period);
-    } else {
-      const currentPrice = prices[i];
-      const prevEma = ema[i - 1];
-      if (typeof currentPrice === 'number' && typeof prevEma === 'number') {
-        ema.push((currentPrice - prevEma) * multiplier + prevEma);
-      } else {
-        ema.push(null);
+      // Initial EMA is SMA
+      let sum = 0;
+      for (let j = 0; j < period; j++) {
+        sum += prices[j]!;
       }
+      prevEma = sum / period;
+      ema.push(prevEma);
+    } else {
+      const currentPrice = prices[i]!;
+      prevEma = (currentPrice - prevEma!) * multiplier + prevEma!;
+      ema.push(prevEma);
     }
   }
   return ema;
@@ -38,43 +47,25 @@ export function calculateEMA(prices: number[], period: number): (number | null)[
 
 export function calculateRSI(prices: number[], period: number): (number | null)[] {
   if (prices.length === 0) return [];
-  
-  const rsi: (number | null)[] = [];
-  const gains: number[] = [];
-  const losses: number[] = [];
 
-  // Calculate changes first
-  for (let i = 1; i < prices.length; i++) {
-    const currentPrice = prices[i];
-    const prevPrice = prices[i - 1];
-    
-    if (typeof currentPrice === 'number' && typeof prevPrice === 'number') {
-      const change = currentPrice - prevPrice;
-      gains.push(Math.max(0, change));
-      losses.push(Math.max(0, -change));
-    } else {
-        gains.push(0);
-        losses.push(0);
-    }
-  }
-
+  const rsi: (number | null)[] = [null]; // First element has no previous
   let avgGain = 0;
   let avgLoss = 0;
 
-  // Initialize averages
-  if (gains.length >= period) {
-      for(let i = 0; i < period; i++) {
-          avgGain += gains[i] || 0;
-          avgLoss += losses[i] || 0;
-      }
-      avgGain /= period;
-      avgLoss /= period;
-  }
+  // Calculate initial changes and averages
+  for (let i = 1; i < prices.length; i++) {
+    const change = prices[i]! - prices[i - 1]!;
+    const gain = Math.max(0, change);
+    const loss = Math.max(0, -change);
 
-  for (let i = 0; i < prices.length; i++) {
     if (i < period) {
+      avgGain += gain;
+      avgLoss += loss;
       rsi.push(null);
     } else if (i === period) {
+      avgGain = (avgGain + gain) / period;
+      avgLoss = (avgLoss + loss) / period;
+
       if (avgLoss === 0) {
         rsi.push(100);
       } else {
@@ -82,13 +73,9 @@ export function calculateRSI(prices: number[], period: number): (number | null)[
         rsi.push(100 - 100 / (1 + rs));
       }
     } else {
-      const currentGain = gains[i - 1];
-      const currentLoss = losses[i - 1];
-      
-      if (typeof currentGain === 'number' && typeof currentLoss === 'number') {
-          avgGain = (avgGain * (period - 1) + currentGain) / period;
-          avgLoss = (avgLoss * (period - 1) + currentLoss) / period;
-      }
+      // Smoothed averages
+      avgGain = (avgGain * (period - 1) + gain) / period;
+      avgLoss = (avgLoss * (period - 1) + loss) / period;
 
       if (avgLoss === 0) {
         rsi.push(100);
@@ -105,180 +92,175 @@ export function calculateRSI(prices: number[], period: number): (number | null)[
 export function calculateMACD(prices: number[], fastPeriod = 12, slowPeriod = 26, signalPeriod = 9): { macd: (number | null)[], signal: (number | null)[], histogram: (number | null)[] } {
   const fastEMA = calculateEMA(prices, fastPeriod);
   const slowEMA = calculateEMA(prices, slowPeriod);
-  
+
   const macdLine: (number | null)[] = [];
-  for(let i = 0; i < prices.length; i++) {
-      if (fastEMA[i] !== null && slowEMA[i] !== null) {
-          macdLine.push(fastEMA[i]! - slowEMA[i]!);
-      } else {
-          macdLine.push(null);
-      }
+  for (let i = 0; i < prices.length; i++) {
+    if (fastEMA[i] !== null && slowEMA[i] !== null) {
+      macdLine.push(fastEMA[i]! - slowEMA[i]!);
+    } else {
+      macdLine.push(null);
+    }
   }
 
   // Calculate Signal Line (EMA of MACD Line)
-  // We need to filter out initial nulls to calculate EMA correctly
   const firstValidIndex = macdLine.findIndex(val => val !== null);
-  let signalLine: (number | null)[] = new Array(prices.length).fill(null);
-  
+  const signalLine: (number | null)[] = new Array(prices.length).fill(null);
+
   if (firstValidIndex !== -1) {
-      const validMacdValues = macdLine.slice(firstValidIndex) as number[];
-      const signalValues = calculateEMA(validMacdValues, signalPeriod);
-      
-      // Place signal values back into the correct positions
-      for (let i = 0; i < signalValues.length; i++) {
-          if (signalValues[i] !== undefined) {
-             signalLine[firstValidIndex + i] = signalValues[i]!;
-          }
+    const validMacdValues = macdLine.slice(firstValidIndex) as number[];
+    const signalValues = calculateEMA(validMacdValues, signalPeriod);
+
+    for (let i = 0; i < signalValues.length; i++) {
+      if (signalValues[i] !== null) {
+        signalLine[firstValidIndex + i] = signalValues[i]!;
       }
+    }
   }
 
   const histogram: (number | null)[] = [];
-  for(let i = 0; i < prices.length; i++) {
-      if (macdLine[i] !== null && signalLine[i] !== null) {
-          histogram.push(macdLine[i]! - signalLine[i]!);
-      } else {
-          histogram.push(null);
-      }
+  for (let i = 0; i < prices.length; i++) {
+    if (macdLine[i] !== null && signalLine[i] !== null) {
+      histogram.push(macdLine[i]! - signalLine[i]!);
+    } else {
+      histogram.push(null);
+    }
   }
 
   return { macd: macdLine, signal: signalLine, histogram };
 }
 
+// Optimized Bollinger Bands using incremental std dev calculation
 export function calculateBollingerBands(prices: number[], period = 20, multiplier = 2): { upper: (number | null)[], middle: (number | null)[], lower: (number | null)[] } {
-    const sma = calculateSMA(prices, period);
-    const upper: (number | null)[] = [];
-    const lower: (number | null)[] = [];
+  const upper: (number | null)[] = [];
+  const middle: (number | null)[] = [];
+  const lower: (number | null)[] = [];
 
-    for (let i = 0; i < prices.length; i++) {
-        if (i < period - 1) {
-            upper.push(null);
-            lower.push(null);
-        } else {
-            const slice = prices.slice(i - period + 1, i + 1);
-            const mean = sma[i]!;
-            const squaredDiffs = slice.map(val => Math.pow(val - mean, 2));
-            const variance = squaredDiffs.reduce((a, b) => a + b, 0) / period;
-            const stdDev = Math.sqrt(variance);
+  let sum = 0;
+  let sumSq = 0;
 
-            upper.push(mean + (multiplier * stdDev));
-            lower.push(mean - (multiplier * stdDev));
-        }
+  for (let i = 0; i < prices.length; i++) {
+    const price = prices[i]!;
+    sum += price;
+    sumSq += price * price;
+
+    if (i < period - 1) {
+      upper.push(null);
+      middle.push(null);
+      lower.push(null);
+    } else {
+      if (i >= period) {
+        const oldPrice = prices[i - period]!;
+        sum -= oldPrice;
+        sumSq -= oldPrice * oldPrice;
+      }
+
+      const mean = sum / period;
+      const variance = (sumSq / period) - (mean * mean);
+      const stdDev = Math.sqrt(Math.max(0, variance)); // Ensure no negative due to floating point
+
+      upper.push(mean + multiplier * stdDev);
+      middle.push(mean);
+      lower.push(mean - multiplier * stdDev);
     }
+  }
 
-    return { upper, middle: sma, lower };
+  return { upper, middle, lower };
 }
 
 export function calculateATR(candles: OHLCV[], period = 14): (number | null)[] {
-    const tr: number[] = [0]; // First TR is 0 or High-Low, usually handled differently but let's say 0 for index alignment
-    
-    // Calculate True Range
-    for (let i = 1; i < candles.length; i++) {
-        const high = candles[i]?.high;
-        const low = candles[i]?.low;
-        const prevClose = candles[i-1]?.close;
-        
-        if (high !== undefined && low !== undefined && prevClose !== undefined) {
-             const tr1 = high - low;
-             const tr2 = Math.abs(high - prevClose);
-             const tr3 = Math.abs(low - prevClose);
-             tr.push(Math.max(tr1, tr2, tr3));
-        } else {
-            tr.push(0);
-        }
+  if (candles.length === 0) return [];
+
+  const result: (number | null)[] = [];
+  let prevAtr = 0;
+  let initialSum = 0;
+
+  for (let i = 0; i < candles.length; i++) {
+    let tr: number;
+
+    if (i === 0) {
+      tr = candles[0]!.high - candles[0]!.low;
+    } else {
+      const high = candles[i]!.high;
+      const low = candles[i]!.low;
+      const prevClose = candles[i - 1]!.close;
+      tr = Math.max(high - low, Math.abs(high - prevClose), Math.abs(low - prevClose));
     }
 
-    // First TR is usually just H-L
-    if (candles.length > 0 && candles[0]) {
-        tr[0] = candles[0].high - candles[0].low;
+    if (i < period - 1) {
+      initialSum += tr;
+      result.push(null);
+    } else if (i === period - 1) {
+      initialSum += tr;
+      prevAtr = initialSum / period;
+      result.push(prevAtr);
+    } else {
+      prevAtr = (prevAtr * (period - 1) + tr) / period;
+      result.push(prevAtr);
     }
+  }
 
-    const atr: (number | null)[] = [];
-    let prevAtr = 0;
-
-    // Reset
-    const result: (number | null)[] = [];
-    let initialSum = 0;
-    
-    for (let i = 0; i < candles.length; i++) {
-        if (i < period) {
-             initialSum += tr[i] || 0;
-             if (i === period - 1) {
-                 prevAtr = initialSum / period;
-                 result.push(prevAtr);
-             } else {
-                 result.push(null);
-             }
-        } else {
-            prevAtr = (prevAtr * (period - 1) + (tr[i] || 0)) / period;
-            result.push(prevAtr);
-        }
-    }
-    
-    return result;
+  return result;
 }
 
-export function calculateStochastic(candles: OHLCV[], period = 14, kPeriod = 3, dPeriod = 3): { k: (number | null)[], d: (number | null)[] } {
-    const kLine: (number | null)[] = [];
+// Optimized Stochastic using rolling min/max
+export function calculateStochastic(candles: OHLCV[], period = 14, kSmooth = 3, dPeriod = 3): { k: (number | null)[], d: (number | null)[] } {
+  const rawK: (number | null)[] = [];
 
-    for (let i = 0; i < candles.length; i++) {
-        if (i < period - 1) {
-            kLine.push(null);
-        } else {
-            const lookback = candles.slice(i - period + 1, i + 1);
-            const lowestLow = Math.min(...lookback.map(c => c.low));
-            const highestHigh = Math.max(...lookback.map(c => c.high));
-            const currentClose = candles[i]?.close;
+  for (let i = 0; i < candles.length; i++) {
+    if (i < period - 1) {
+      rawK.push(null);
+    } else {
+      let lowestLow = Infinity;
+      let highestHigh = -Infinity;
 
-            if (currentClose !== undefined && highestHigh === lowestLow) {
-                kLine.push(50); // Avoid division by zero
-            } else if (currentClose !== undefined) {
-                const k = ((currentClose - lowestLow) / (highestHigh - lowestLow)) * 100;
-                kLine.push(k);
-            } else {
-                kLine.push(null);
-            }
-        }
+      for (let j = i - period + 1; j <= i; j++) {
+        lowestLow = Math.min(lowestLow, candles[j]!.low);
+        highestHigh = Math.max(highestHigh, candles[j]!.high);
+      }
+
+      const currentClose = candles[i]!.close;
+      if (highestHigh === lowestLow) {
+        rawK.push(50);
+      } else {
+        rawK.push(((currentClose - lowestLow) / (highestHigh - lowestLow)) * 100);
+      }
     }
+  }
 
-    let smoothK = kLine;
-    if (kPeriod > 1) {
-        // We need to smooth the valid values of kLine
-        const firstValid = kLine.findIndex(x => x !== null);
-        if (firstValid !== -1) {
-            const validKs = kLine.slice(firstValid) as number[];
-            const smoothed = calculateSMA(validKs, kPeriod);
-             // Realign
-             smoothK = new Array(kLine.length).fill(null);
-             for(let j=0; j<smoothed.length; j++) {
-                 const val = smoothed[j];
-                 if (val !== null && val !== undefined && (firstValid + j) < smoothK.length) {
-                     smoothK[firstValid + j] = val;
-                 }
-             }
-        }
+  // Smooth %K with SMA if kSmooth > 1
+  let smoothK: (number | null)[];
+  if (kSmooth > 1) {
+    const validStart = rawK.findIndex(x => x !== null);
+    if (validStart === -1) {
+      smoothK = rawK;
+    } else {
+      const validValues = rawK.slice(validStart) as number[];
+      const smoothed = calculateSMA(validValues, kSmooth);
+      smoothK = new Array(validStart).fill(null).concat(smoothed);
     }
+  } else {
+    smoothK = rawK;
+  }
 
-    // Calculate %D (SMA of %K)
-    const firstValidK = smoothK.findIndex(x => x !== null);
-    let dLine: (number | null)[] = new Array(candles.length).fill(null);
-    
-    if (firstValidK !== -1) {
-        const validKs = smoothK.slice(firstValidK) as number[];
-        const smaD = calculateSMA(validKs, dPeriod);
-         for(let j=0; j<smaD.length; j++) {
-             const val = smaD[j];
-             if (val !== null && val !== undefined && (firstValidK + j) < dLine.length) {
-                 dLine[firstValidK + j] = val;
-             }
-         }
+  // Calculate %D (SMA of smooth %K)
+  const firstValidK = smoothK.findIndex(x => x !== null);
+  let dLine: (number | null)[] = new Array(candles.length).fill(null);
+
+  if (firstValidK !== -1) {
+    const validKs = smoothK.slice(firstValidK) as number[];
+    const smaD = calculateSMA(validKs, dPeriod);
+    for (let j = 0; j < smaD.length && firstValidK + j < dLine.length; j++) {
+      dLine[firstValidK + j] = smaD[j]!;
     }
+  }
 
-    return { k: smoothK, d: dLine };
+  return { k: smoothK, d: dLine };
 }
 
 export function calculateIndicators(candles: OHLCV[]): OHLCV[] {
   const closes = candles.map(c => c.close);
-  
+
+  // All these are now O(n) instead of O(n*period)
   const sma20 = calculateSMA(closes, 20);
   const sma50 = calculateSMA(closes, 50);
   const sma100 = calculateSMA(closes, 100);
@@ -287,14 +269,15 @@ export function calculateIndicators(candles: OHLCV[]): OHLCV[] {
   const ema9 = calculateEMA(closes, 9);
   const ema21 = calculateEMA(closes, 21);
   const rsi = calculateRSI(closes, 14);
-  
+
   const macd = calculateMACD(closes);
   const bb = calculateBollingerBands(closes);
   const atr = calculateATR(candles);
   const stoch = calculateStochastic(candles);
 
   return candles.map((candle, i) => {
-    const enriched = { ...candle };
+    const enriched: OHLCV & Record<string, number> = { ...candle };
+
     if (sma20[i] !== null) enriched['SMA_20'] = sma20[i]!;
     if (sma50[i] !== null) enriched['SMA_50'] = sma50[i]!;
     if (sma100[i] !== null) enriched['SMA_100'] = sma100[i]!;
@@ -303,17 +286,17 @@ export function calculateIndicators(candles: OHLCV[]): OHLCV[] {
     if (ema9[i] !== null) enriched['EMA_9'] = ema9[i]!;
     if (ema21[i] !== null) enriched['EMA_21'] = ema21[i]!;
     if (rsi[i] !== null) enriched['RSI'] = rsi[i]!;
-    
+
     if (macd.macd[i] !== null) enriched['MACD'] = macd.macd[i]!;
     if (macd.signal[i] !== null) enriched['MACD_Signal'] = macd.signal[i]!;
     if (macd.histogram[i] !== null) enriched['MACD_Hist'] = macd.histogram[i]!;
-    
+
     if (bb.upper[i] !== null) enriched['BB_Upper'] = bb.upper[i]!;
     if (bb.middle[i] !== null) enriched['BB_Middle'] = bb.middle[i]!;
     if (bb.lower[i] !== null) enriched['BB_Lower'] = bb.lower[i]!;
-    
+
     if (atr[i] !== null) enriched['ATR'] = atr[i]!;
-    
+
     if (stoch.k[i] !== null) enriched['Stoch_K'] = stoch.k[i]!;
     if (stoch.d[i] !== null) enriched['Stoch_D'] = stoch.d[i]!;
 

@@ -1,10 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import RuleBuilder, { type RuleBuilderHandle } from './RuleBuilder';
 import MetricsSummary from './MetricsSummary';
 import EquityCurve from './EquityCurve';
 import PriceChart from './PriceChart';
 import ReturnsHistogram from './ReturnsHistogram';
-import { runBacktest, previewCsv } from '../services/api';
+import { runBacktest, previewCsv, fetchLatestHistory } from '../services/api';
 
 export default function Simulator() {
   const entryRuleRef = useRef<RuleBuilderHandle>(null);
@@ -16,6 +16,32 @@ export default function Simulator() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const loadLastSimulation = async () => {
+      try {
+        const lastSim = await fetchLatestHistory();
+        if (lastSim) {
+          setResults(lastSim);
+          if (lastSim.initialBalance) {
+            setInitialBalance(lastSim.initialBalance);
+          }
+
+          if (lastSim.rules) {
+            // Small timeout to ensure refs are ready if helpful, though standard useEffect should be fine
+            setTimeout(() => {
+              if (lastSim.rules.entry) entryRuleRef.current?.setRule(lastSim.rules.entry);
+              if (lastSim.rules.exit) exitRuleRef.current?.setRule(lastSim.rules.exit);
+            }, 0);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load history on startup", err);
+      }
+    };
+
+    loadLastSimulation();
+  }, []);
 
   const handleRandomStrategy = () => {
     entryRuleRef.current?.randomize();
